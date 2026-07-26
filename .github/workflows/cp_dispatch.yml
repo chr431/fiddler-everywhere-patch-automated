@@ -446,6 +446,9 @@ jobs:
         run: |
           $source_server_folder = "msojocs-patch/server/file"
           $destination_server_folder = "FE/resources/app/out"
+          if (-not (Test-Path $destination_server_folder)) {
+            $destination_server_folder = "FE/resources/app.asar.unpacked/out"
+          }
 
           if (Test-Path $source_server_folder) {
             Copy-Item -Path $source_server_folder -Destination $destination_server_folder -Recurse
@@ -458,6 +461,9 @@ jobs:
         run: |
           $translate_js = "msojocs-patch/server/translate.js"
           $dest_translate = "FE/resources/app/out/translate.js"
+          if (-not (Test-Path "FE/resources/app/out")) {
+            $dest_translate = "FE/resources/app.asar.unpacked/out/translate.js"
+          }
 
           if (Test-Path $translate_js) {
             Copy-Item -Path $translate_js -Destination $dest_translate -Force
@@ -482,6 +488,9 @@ jobs:
       - name: Set user credentials
         run: |
           $source_json = "FE/resources/app/out/file/identity.getfiddler.com/oauth/token.json"
+          if (-not (Test-Path $source_json)) {
+            $source_json = "FE/resources/app.asar.unpacked/out/file/identity.getfiddler.com/oauth/token.json"
+          }
           $main_content = Get-Content -Path $source_json -Raw | ConvertFrom-Json
 
           $main_content.user_info.email = $env:PATCH_USER_EMAIL
@@ -495,9 +504,12 @@ jobs:
       - name: Patch main.js to main.original.js
         run: |
           $source_main = "FE/resources/app/out/main.js"
+          if (-not (Test-Path $source_main)) {
+            $source_main = "FE/resources/app.asar.unpacked/out/main.js"
+          }
           $main_content = Get-Content -Path $source_main -Raw
 
-          $new_main = "FE/resources/app/out/main.original.js"
+          $new_main = "$([System.IO.Path]::GetDirectoryName($source_main))/main.original.js"
 
           $source_index = "msojocs-patch/server/index.js"
           $index_content = Get-Content -Path $source_index -Raw
